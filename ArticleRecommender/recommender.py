@@ -1,17 +1,8 @@
 import numpy as np
 import pandas as pd
-import recommender_functions as rf
+import recommender_helper_functions as rf
 import sys # can use sys to take command line arguments
 
-
-# create a method to load the data, offering the option to load csv or existing df
-# (if need cleaning up)
-# make sure article ID is a string in df, an int in df_content
-
-# function to rank articles in term of number of interactions
-
-# in the fit method:
-# use FunkSVD, using a user-item matrix which has nb of interactions as proxy for rating
 
 # first create a prediction method
 # if existing user-article pair, use FunkSVD results
@@ -22,8 +13,8 @@ import sys # can use sys to take command line arguments
 
 # to make recommendations:
 # if new user: knowledge-based
-# if existing user: SVD + content based to get rating, top k rating and most popular overall to
-# break ties
+# if existing user: SVD top k rating and most popular overall to break ties, not risk recommending
+# brand new articles for it would be very computationally expensive and too "risky"
 # if article: content-based
 
 # to predict rating:
@@ -49,6 +40,19 @@ class Recommender():
         '''
         self.df = None
         self.df_content = None
+        self.user_item_df = None
+        self.user_item = None
+        self.iters = None
+        self.latent_features = None
+        self.user_mat = None
+        self.article_mat = None
+        self.n_articles = None
+        self.n_users = None
+        self.learning_rate = None
+        self.user_ids_series = None
+        self.article_ids_series = None
+        self.num_interactions = None
+        self.ranked_articles = None
 
     def load_data(self, interactions_path, content_path, csv=True,
                   interactions=None, content=None):
@@ -90,13 +94,11 @@ class Recommender():
             print('The article ID in the content dataset needs to be an integer. \
                         Please modify and reload the data')
 
-    def fit(self, reviews_pth, movies_pth, latent_features=12, learning_rate=0.0001, iters=100):
+    def fit(self, latent_features=12, learning_rate=0.0001, iters=100):
         '''
         This function performs matrix factorization using a basic form of FunkSVD with no regularization
 
         INPUT:
-        reviews_pth - path to csv with at least the four columns: 'user_id', 'movie_id', 'rating', 'timestamp'
-        movies_pth - path to csv with each movie and movie information in each row
         latent_features - (int) the number of latent features used
         learning_rate - (float) the learning rate
         iters - (int) the number of iterations
@@ -104,23 +106,23 @@ class Recommender():
         OUTPUT:
         None - stores the following as attributes:
         n_users - the number of users (int)
-        n_movies - the number of movies (int)
-        num_ratings - the number of ratings made (int)
-        reviews - dataframe with four columns: 'user_id', 'movie_id', 'rating', 'timestamp'
-        movies - dataframe of
-        user_item_mat - (np array) a user by item numpy array with ratings and nans for values
+        n_articles - the number of articles (int)
+        num_interactions - the number of interactions calculated (int)
+        user_item_df - (pandas df) a user by item dataframe with interactions and nans for values
+        user_item - (np array) a user by item numpy array with interactions and nans for values
         latent_features - (int) the number of latent features used
         learning_rate - (float) the learning rate
         iters - (int) the number of iterations
+        user_ids_series - (series) all the user_id's contained in our dataset
+        article_ids_series - (series) all the article id's contained in our dataset
+        user_mat - (np array) the user matrix resulting from FunkSVD
+        article_mat - (np array) the item matrix resulting from FunkSVD
+
         '''
-        # Store inputs as attributes
-        self.reviews = pd.read_csv(reviews_pth)
-        self.movies = pd.read_csv(movies_pth)
 
         # Create user-item matrix
-        usr_itm = self.reviews[['user_id', 'movie_id', 'rating', 'timestamp']]
-        self.user_item_df = usr_itm.groupby(['user_id','movie_id'])['rating'].max().unstack()
-        self.user_item_mat= np.array(self.user_item_df)
+        self.user_item_df = rf.create_user_item_matrix(self.df)
+        self.user_item = np.array(self.user_item_df)
 
         # Store more inputs
         self.latent_features = latent_features
@@ -128,21 +130,21 @@ class Recommender():
         self.iters = iters
 
         # Set up useful values to be used through the rest of the function
-        self.n_users = self.user_item_mat.shape[0]
-        self.n_movies = self.user_item_mat.shape[1]
-        self.num_ratings = np.count_nonzero(~np.isnan(self.user_item_mat))
+        self.n_users = self.user_item_df.shape[0]
+        self.n_articles = self.user_item_df.shape[1]
+        self.num_interactions = self.user_item_df.sum().sum()
         self.user_ids_series = np.array(self.user_item_df.index)
-        self.movie_ids_series = np.array(self.user_item_df.columns)
+        self.article_ids_series = np.array(self.user_item_df.columns)
 
         # initialize the user and movie matrices with random values
         user_mat = np.random.rand(self.n_users, self.latent_features)
-        movie_mat = np.random.rand(self.latent_features, self.n_movies)
+        article_mat = np.random.rand(self.latent_features, self.n_articles)
 
         # initialize sse at 0 for first iteration
         sse_accum = 0
 
         # keep track of iteration and MSE
-        print("Optimizaiton Statistics")
+        print("Optimization Statistics")
         print("Iterations | Mean Squared Error ")
 
         # for each iteration
@@ -154,33 +156,32 @@ class Recommender():
 
             # For each user-movie pair
             for i in range(self.n_users):
-                for j in range(self.n_movies):
+                for j in range(self.n_articles):
 
                     # if the rating exists
-                    if self.user_item_mat[i, j] > 0:
+                    if self.user_item[i, j] > 0:
 
                         # compute the error as the actual minus the dot product of the user and movie latent features
-                        diff = self.user_item_mat[i, j] - np.dot(user_mat[i, :], movie_mat[:, j])
+                        diff = self.user_item[i, j] - np.dot(user_mat[i, :], article_mat[:, j])
 
                         # Keep track of the sum of squared errors for the matrix
                         sse_accum += diff**2
 
                         # update the values in each matrix in the direction of the gradient
                         for k in range(self.latent_features):
-                            user_mat[i, k] += self.learning_rate * (2*diff*movie_mat[k, j])
-                            movie_mat[k, j] += self.learning_rate * (2*diff*user_mat[i, k])
+                            user_mat[i, k] += self.learning_rate * (2*diff*article_mat[k, j])
+                            article_mat[k, j] += self.learning_rate * (2*diff*user_mat[i, k])
 
             # print results
-            print("%d \t\t %f" % (iteration+1, sse_accum / self.num_ratings))
+            print("%d \t\t %f" % (iteration+1, sse_accum / self.num_interactions))
 
         # SVD based fit
         # Keep user_mat and movie_mat for safe keeping
         self.user_mat = user_mat
-        self.movie_mat = movie_mat
+        self.article_mat = article_mat
 
         # Knowledge based fit
-        self.ranked_movies = rf.create_ranked_df(self.movies, self.reviews)
-
+        self.ranked_articles = rf.rank_articles(self.df)
 
     def predict_rating(self, user_id, movie_id):
         '''

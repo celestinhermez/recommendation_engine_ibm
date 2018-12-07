@@ -26,32 +26,32 @@ def get_top_article_ids(n, df):
 
     return top_articles  # Return the top article ids
 
+def rank_articles(df):
+    '''
 
-def get_top_articles(n, df):
+    :param df: (pandas dataframe) dataframe containing user-article interactions, containing article_id,
+    title and user_id
+    :return: ranked_articles: pandas dataframe with articles ranked by number of interactions
+    '''
+
+    grouped = df.groupby(['article_id', 'title'], as_index=False)['user_id'].count()
+    grouped.rename(columns={'user_id': 'num_interactions'}, inplace=True)
+
+    ranked_articles = grouped.sort_values(by='num_interactions', axis=0, ascending=False)
+
+    return ranked_articles
+
+def get_top_articles(n, ranked_df):
     '''
     INPUT:
     n - (int) the number of top articles to return
-    df - (pandas dataframe) dataframe containing user-article interactions, containing article_id,
-    title and user_id
-
+    ranked_df - (pandas dataframe) dataframe containing articles ranked based on their popularity
 
     OUTPUT:
     top_articles - (list) A list of the top 'n' article titles
     '''
 
-    top_ids = get_top_article_ids(n, df)
-
-    # we have to proceed through a for loop to keep the same order
-    article_names = []
-    top_articles = []
-
-    # We first get a list of lists containing repetitions of the article name
-    for id in top_ids:
-        article_names.append(df.loc[df.article_id == id, 'title'].values.tolist())
-
-    # then we make a new list with the unique values
-    for names in article_names:
-        top_articles.append(names[0])
+    top_articles = ranked_df.iloc[:n]['title'].values.tolist()
 
     return top_articles  # Return the top article titles from df (not df_content)
 
