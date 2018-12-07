@@ -123,13 +123,13 @@ def tokenize(text):
     return clean_tokens
 
 
-def make_content_recs(article_id, m=10, df_content=df_content, tokenizer=tokenize):
+def make_content_recs(article_id, df_content, m=10, tokenizer=tokenize):
     '''
     INPUT:
     article_id - (int) the article we want to find similar articles to
     m - (int) the number of similar articles we want to find
     df_content - (Pandas dataframe) a dataframe containing content information
-    about the articles containing doc_description, article_id as an int of interest
+    about the articles containing doc_description, article_id as an int
 
     OUTPUT:
     similar_articles - (list) a list of similar article ID's
