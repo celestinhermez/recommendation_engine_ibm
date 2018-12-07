@@ -211,8 +211,10 @@ class Recommender():
             # Take dot product of that row and column in U and V to make prediction
             pred = np.dot(self.user_mat[user_row, :], self.article_mat[:, article_col])
 
-            article_name = rf.get_article_names([article_id], self.df)
-            print("For user {} we predict a {} rating for the movie {}.".format(user_id, round(pred, 2), article_name))
+            article_name = rf.get_article_names([article_id], self.df)[0]
+            print("For user {} we predict {} interactions with the article: '{}'.".format(user_id,
+                                                                                      round(pred, 2),
+                                                                                      article_name))
 
             return pred
 
@@ -229,9 +231,9 @@ class Recommender():
         #             ratings = self.ranked_articles.loc[self.ranked_articles.article_id.isin(
         #                 similar_articles
         #             ),'num_interactions']
-        #             article_name = rf.get_article_names(article_id, self.df)
+        #             article_name = rf.get_article_names(article_id, self.df)[0]
         #             pred = ratings.mean()
-        #             print("For user {} we predict a {} rating for the movie {}.".format(user_id,
+        #             print("For user {} we predict {} interactions with the article: '{}'.".format(user_id,
         #                                                                                 round(pred,2),
         #                                                                                 article_name))
         #
