@@ -54,8 +54,8 @@ class Recommender():
                   interactions=None, content=None):
         '''
         :param interactions_path: (str) path to a CSV file containing information about interactions
-        between users and articles. It must include user_id, article_id (a string of the form
-        '20.0') and title
+        between users and articles. It must include user_id, article_id (a float of the form
+        20.0) and title
         :param content_path: (str) path to a CSV file containing information about the content of the
         articles. It must include article_id (as an int) and doc_description
         between users and articles. It must include user_id, article_id and title
@@ -82,11 +82,11 @@ class Recommender():
             self.df = interactions
             self.df_content = content
 
-        if not type(self.df.article_id) is str:
+        if not self.df.article_id.dtype == 'float64':
             print('The article ID in the interactions dataset needs to be of the form "20.0". \
             Please modify and reload the data')
 
-        if not type(self.df_content.article_id) in int:
+        if self.df_content.article_id.dtype == int:
             print('The article ID in the content dataset needs to be an integer. \
                         Please modify and reload the data')
 
