@@ -123,7 +123,7 @@ def tokenize(text):
     return clean_tokens
 
 
-def make_content_recs(article_id, df_content, m=10, tokenizer=tokenize):
+def make_content_recs(article_id, df_content, m=5, tokenizer=tokenize):
     '''
     INPUT:
     article_id - (int) the article we want to find similar articles to
