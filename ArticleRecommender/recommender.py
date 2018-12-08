@@ -187,7 +187,7 @@ class Recommender():
         '''
         INPUT:
         user_id - (int) the user_id from interactions df
-        article_id - (int or float) the article_id according the interactions df
+        article_id - (int) the article_id according the interactions df
         doc_description
         df_content - updated content dataframe with the new article to predict
 
@@ -219,36 +219,34 @@ class Recommender():
             return pred
 
         except:
-            None
+            # then we deal with the case where this is a new article (in the content dataset), we find the rating
+            # based on rating of similar movies. If no interaction with any similar article, we
+            # predict 0
+            if (str(article_id) in self.df_content.article_id.values.tolist()) | (article_id in self.article_ids_series):
+                if user_id in self.user_ids_series:
+                    similar_articles = rf.make_content_recs(article_id, self.df_content)
+                    user_row = np.where(self.user_ids_series == user_id)[0][0]
+                    article_col = np.where(np.isin(self.article_ids_series, similar_articles))[0][0]
+                    ratings = self.user_item[user_row,article_col]
+                    article_name = self.df_content.loc[self.df_content.article_id == str(article_id),
+                                                       'doc_full_name'].values[0]
+                    if np.isnan(ratings.mean()):
+                        pred = 0
+                    else:
+                        pred = ratings.mean()
+                    print("For user {} we predict {} interactions with the article: '{}'.".format(user_id,
+                                                                                        round(pred,2),
+                                                                                        article_name))
 
-        # except:
-        #     # then we deal with the case when the user_id is in the interactions df but not
-        #     # the article. In this case, we use content-based filtering to find the rating
-        #     # based on rating of similar movies
-        #     try:
-        #         if article_id in self.df_content.article_id:
-        #             similar_articles = rf.make_content_recs(article_id, self.df_content)
-        #             ratings = self.ranked_articles.loc[self.ranked_articles.article_id.isin(
-        #                 similar_articles
-        #             ),'num_interactions']
-        #             article_name = rf.get_article_names(article_id, self.df)[0]
-        #             pred = ratings.mean()
-        #             print("For user {} we predict {} interactions with the article: '{}'.".format(user_id,
-        #                                                                                 round(pred,2),
-        #                                                                                 article_name))
-        #
-        #             return pred
-        #
-        #         else:
-        #             print('The provided article ID is not in the interactions nor content dataset, \
-        #                   no prediction can be made')
-        #             return None
-        #
-        #     # for the final case, when the user ID is not in the interactions df we can't make predictions
-        #     except:
-        #         print('The user ID provided is not in the interactions df, no prediction can be made')
-        #         return None
+                    return pred
+                else:
+                    print('The user ID provided is not in the interactions df. No prediction can be made')
+                    return None
 
+            # finally, if the article ID isn't in the content dataset, we cannot make a prediction
+            else:
+                print('The provided article ID is not in the interactions nor content dataset. No prediction can be made')
+                return None
 
     def make_recommendations(self, _id, _id_type='movie', rec_num=5):
         '''
