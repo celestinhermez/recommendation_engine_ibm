@@ -58,7 +58,7 @@ class Recommender():
                   interactions=None, content=None):
         '''
         :param interactions_path: (str) path to a CSV file containing information about interactions
-        between users and articles. It must include user_id, article_id (a float of the form
+        between users and articles. It must include user_id (int), article_id (a float of the form
         20.0) and title
         :param content_path: (str) path to a CSV file containing information about the content of the
         articles. It must include article_id (as an int) and doc_description
@@ -85,6 +85,12 @@ class Recommender():
         else:
             self.df = interactions
             self.df_content = content
+
+        if not self.df.user_id.dtype == 'int64':
+            try:
+                self.df.user_id.astype('int64')
+            except:
+                print('The user ID in the interactions dataset cannot be converted to an integer. Please modify and reload the data')
 
         if not self.df.article_id.dtype == 'float64':
             try:
