@@ -102,10 +102,10 @@ def tokenize(text):
     '''
     :param text: a string of text
     :return: a list of tokens for the text which has been normalized,
-    stripped of stop words, tokenized and lemmatized
+    tokenized and lemmatized
     '''
 
-    # We first normalize the test
+    # We first normalize and tokenize the test
     text = re.sub(r"[^a-zA-Z0-9]", " ", text.lower())
     tokens = word_tokenize(text)
 
