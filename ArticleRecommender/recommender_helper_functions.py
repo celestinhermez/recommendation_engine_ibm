@@ -94,7 +94,10 @@ def get_article_names(article_ids, df):
 
     # then we make a new list with the unique values
     for names in article_rep_names:
-        article_names.append(names[0])
+        try:
+            article_names.append(names[0])
+        except:
+            article_names.append('No title available')
 
     return article_names  # Return the article names associated with list of article ids
 
@@ -149,7 +152,7 @@ def make_content_recs(article_id, df_content, m=10, tokenizer=tokenize):
 
     # we get the representation of the doc and compute the cosine similarity between the doc and all the others
     transformed_text = pipeline.fit_transform(df_content.doc_description)
-    article_idx = np.where(df_content.article_id == str(article_id))[0][0]
+    article_idx = np.where(df_content.article_id == article_id)[0][0]
     similarity = cosine_similarity(transformed_text[article_idx], transformed_text)[0]
 
     # we can create a dictionary with the cosine similarity of each article with the article of interest
@@ -158,7 +161,7 @@ def make_content_recs(article_id, df_content, m=10, tokenizer=tokenize):
         similar_articles[df_content.iloc[idx]['article_id']] = similarity[idx]
 
     # we remove the own article, and return the keys associated with the highest value of similarity
-    similar_articles.pop(str(article_id))
+    similar_articles.pop(article_id)
     similar_articles = sorted(similar_articles, key=similar_articles.get, reverse=True)[:m]
     similar_articles = [float(int(i)) for i in similar_articles]
 
