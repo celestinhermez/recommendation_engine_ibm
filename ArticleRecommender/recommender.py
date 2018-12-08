@@ -87,12 +87,16 @@ class Recommender():
             self.df_content = content
 
         if not self.df.article_id.dtype == 'float64':
-            print('The article ID in the interactions dataset needs to be of the form "20.0". \
-            Please modify and reload the data')
+            try:
+                self.df.article_id.astype('float64')
+            except:
+                print('The article ID in the interactions dataset cannot be converted to a float. Please modify and reload the data')
 
         if not self.df_content.article_id.dtype == 'int64':
-            print('The article ID in the content dataset needs to be an integer. \
-                        Please modify and reload the data')
+            try:
+                self.df_content.article_id.astype('int64')
+            except:
+                print('The article ID in the content dataset cannot be converted to an integer. Please modify and reload the data')
 
     def fit(self, latent_features=12, learning_rate=0.0001, iters=100):
         '''
