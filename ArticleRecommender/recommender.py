@@ -1,29 +1,6 @@
 import numpy as np
 import pandas as pd
 import recommender_helper_functions as rf
-import sys # can use sys to take command line arguments
-
-
-# first create a prediction method
-# if existing user-article pair, use FunkSVD results
-# if new article, find similarity of this article to all others, find top 5 most similar
-# and take average of their ratings. Make sure we have all the necessary information to find
-# the similarity
-# if brand new user, cannot predict a rating
-
-# to make recommendations:
-# if new user: knowledge-based
-# if existing user: SVD top k rating and most popular overall to break ties, not risk recommending
-# brand new articles for it would be very computationally expensive and too "risky"
-# if article: content-based
-
-# to predict rating:
-# if new user: nothing
-# if existing user and existing article: FUnkSVD
-# if existing article and new article (specify brand new article), predict average
-# of top similar ratings. Make sure we have all the information necessary to predict (doc desc etc)
-
-# in the README, give examples of usage. Recommend pip installing, but possible to clone the repo
 
 class Recommender():
     '''
@@ -145,7 +122,7 @@ class Recommender():
         self.user_ids_series = np.array(self.user_item_df.index)
         self.article_ids_series = np.array(self.user_item_df.columns)
 
-        # initialize the user and movie matrices with random values
+        # initialize the user and article matrices with random values
         user_mat = np.random.rand(self.n_users, self.latent_features)
         article_mat = np.random.rand(self.latent_features, self.n_articles)
 
@@ -163,14 +140,14 @@ class Recommender():
             old_sse = sse_accum
             sse_accum = 0
 
-            # For each user-movie pair
+            # For each user-article pair
             for i in range(self.n_users):
                 for j in range(self.n_articles):
 
                     # if the rating exists
                     if self.user_item[i, j] > 0:
 
-                        # compute the error as the actual minus the dot product of the user and movie latent features
+                        # compute the error as the actual minus the dot product of the user and article latent features
                         diff = self.user_item[i, j] - np.dot(user_mat[i, :], article_mat[:, j])
 
                         # Keep track of the sum of squared errors for the matrix
@@ -185,7 +162,7 @@ class Recommender():
             print("%d \t\t %f" % (iteration+1, sse_accum / self.num_interactions))
 
         # SVD based fit
-        # Keep user_mat and movie_mat for safe keeping
+        # Keep user_mat and article_mat for safe keeping
         self.user_mat = user_mat
         self.article_mat = article_mat
 
@@ -286,13 +263,13 @@ class Recommender():
                 indices = preds.argsort()[-rec_num:][::-1] #indices
                 rec_ids = self.article_ids_series[indices].tolist()
                 rec_names = rf.get_article_names(rec_ids, self.df)
-                print('We recommend the article IDs {} with titles {}'.format(rec_ids, rec_names))
+                print('For user ID {}, we recommend the article IDs {} with titles {}'.format(_id, rec_ids, rec_names))
 
             else:
                 # if we don't have this user, give just top ratings back
                 rec_ids = self.ranked_articles.iloc[:rec_num]['article_id'].values.tolist()
                 rec_names = self.ranked_articles.iloc[:rec_num]['title'].values.tolist()
-                print("Because this user wasn't in our database, we are giving back the top movie recommendations for all users. \n")
+                print("Because this user with ID {} wasn't in our database, we are giving back the top movie recommendations for all users. \n".format(_id))
                 print("The top article ID's are {}, with titles {}".format(rec_ids, rec_names))
 
         # Find similar articles if it is a movie that is passed
@@ -300,29 +277,9 @@ class Recommender():
             if _id in self.df_content.article_id.tolist():
                 rec_ids = rf.make_content_recs(_id, self.df_content, m=rec_num)
                 rec_names = rf.get_article_names(rec_ids, self.df)
-                print('The articles most similar have IDs {}, and titles {}'.format(rec_ids, rec_names))
+                print('The articles most similar to article ID {} have IDs {}, and titles {}'.format(_id, rec_ids, rec_names))
             else:
-                print("That movie doesn't exist in our database.  Sorry, we don't have any recommendations for you.")
+                print("That article doesn't exist in our database.  Sorry, we don't have any recommendations for you.")
 
         return rec_ids, rec_names
 
-# if __name__ == '__main__':
-#     import recommender as r
-#
-#     #instantiate recommender
-#     rec = r.Recommender()
-#
-#     # fit recommender
-#     rec.fit(reviews_pth='data/train_data.csv', movies_pth= 'data/movies_clean.csv', learning_rate=.01, iters=1)
-#
-#     # predict
-#     rec.predict_rating(user_id=8, movie_id=2844)
-#
-#     # make recommendations
-#     print(rec.make_recommendations(8,'user')) # user in the dataset
-#     print(rec.make_recommendations(1,'user')) # user not in dataset
-#     print(rec.make_recommendations(1853728)) # movie in the dataset
-#     print(rec.make_recommendations(1)) # movie not in dataset
-#     print(rec.n_users)
-#     print(rec.n_movies)
-#     print(rec.num_ratings)
