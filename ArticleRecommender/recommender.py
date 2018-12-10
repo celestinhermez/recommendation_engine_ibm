@@ -34,21 +34,23 @@ class Recommender():
     def load_data(self, interactions_path, content_path, csv=True,
                   interactions=None, content=None):
         '''
-        :param interactions_path: (str) path to a CSV file containing information about interactions
+        INPUT
+        interactions_path - (str) path to a CSV file containing information about interactions
         between users and articles. It must include user_id (int), article_id (a float of the form
         20.0) and title
-        :param content_path: (str) path to a CSV file containing information about the content of the
+        content_path - (str) path to a CSV file containing information about the content of the
         articles. It must include article_id (as an int) and doc_description
         between users and articles. It must include user_id, article_id and title
-        :param csv: (bool) a Boolean specifying whether the document is a CSV file or an already
+        csv -(bool) a Boolean specifying whether the document is a CSV file or an already
         existing Pandas dataframe
-        :param interactions: (pandas dataframe) contains information about interactions
+        interactions - (pandas dataframe) contains information about interactions
         between users and articles. It must contain user_id, article_id (a string of the form
         '20.0') and title
-        :param content: (pandas dataframe) contains information about the content of the
+        content -(pandas dataframe) contains information about the content of the
         articles. It must include article_id (as an int) and doc_description
 
-        :return: None, updates the following attributes
+        OUTPUT
+        None, updates the following attributes
         self.df - (pandas dataframe) (pandas dataframe) contains information about interactions
         between users and articles
         self.df_content - (pandas dataframe) contains information about the content of the
