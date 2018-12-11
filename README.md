@@ -19,8 +19,9 @@ Specify developed on Mac.
 ## Installation
 
 In order to install this package, simply type
-`pip install article-recommender` in the terminal. In order to run
-everything properly (including the development notebook), the
+`pip install article_recommender` in the terminal. Then, the main class can be imported
+by `from article_recommender import ArticleRecommender`.
+In order to run everything properly (including the development notebook), the
 following libraries need to be installed locally:
 * numpy
 * pandas
@@ -40,6 +41,20 @@ This folder contains all the files pertaining to the development
 notebook that forms the basis of this package. This notebook was
 created as part of Udacity's Data Scientist nanodegree, and all
 the tests associated were created by them.
+
+**project_tests.py**: tests developed by Udacity to test the functions created in the
+development notebook.
+
+**top_5.p**, **top_10.p**, **top_20.p**, **user_item_matrix.p**: additional documents
+called in *project_tests.py* to test our results
+
+**Recommendations_with_IBM.ipynb**: a Jupyter development notebook which contains all the
+functions informing the package. The bare bones of this (instructions) were provided by
+Udacity, but all the code is mine. Running this notebook as is will enable to follow
+the main steps behind the recommendation engine, as well as test new functionalities
+
+**Recommendations_with_IBM.html**: an HTML version of the development notebook, in case
+only the results are of interest
 
 #### Data
 
