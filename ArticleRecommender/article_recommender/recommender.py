@@ -182,13 +182,14 @@ class ArticleRecommender():
         OUTPUT:
         pred - the predicted rating for user_id-movie_id according to FunkSVD
 
-        Description: we have two cases that we want to treat differently:
+        Description: we have four cases that we want to treat differently:
             - if both the user_id and article_id are in the interactions df, we use the
             results from FunkSVD
             - if the user_id is in interactions df but the article ID is not (it is brand new),
             if it is in the content dataframe then we use content-based filtering to predict ratings
             based on ratings of similar movies
-            - if the user_id is not in the interactions df, we cannot make any recommendations
+            - if the user_id is not in the interactions df, we cannot make any predictions
+            - if the article_id is neither in the content or interaction dataset then we cannot predict anything
         '''
 
         # we first deal with the case where both user and article are in the interactions dataframe
@@ -249,8 +250,8 @@ class ArticleRecommender():
 
         DESCRIPTION:
         If the user is available in the interactions dataset, we use the matrix factorization data.
-        If the user is new we simply return the top k articles
-        If we are trying to recommend based on an article, we will use a content-based recommender system
+        If the user is new we simply return the top rec_num articles
+        If we are trying to recommend based on an article, we will use a content-based recommendation system
         '''
         rec_ids, rec_names = None, None
         if _id_type == 'user':

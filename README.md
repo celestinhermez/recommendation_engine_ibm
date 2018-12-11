@@ -1,6 +1,7 @@
 # Recommendation Engine for Articles
 This project was originally part of Udacity's Data Scientist 
-nanodegree. The development notebook included in this repository 
+nanodegree. The development notebook included in this repository ([here](https://github.com/celestinhermez/recommendation_engine_ibm)
+if this documentation is read on the PyPi website)
 contained the basic steps to create the methods that inform
 the Recommender class I created. Although this project was originally
 meant for IBM Watson's platform, I have generalized the approach
@@ -12,9 +13,6 @@ information about the interactions between users and existing articles
 as well as a description about these articles is able to create
 a recommendation engine with a few lines of code thanks to this project.
 
-
-Certain article names weird because of formatting in original doc, normal
-Specify developed on Mac.
 
 ## Installation
 
@@ -74,9 +72,129 @@ to the previous one, the only difference being that users are identified
 by hashed emails rather than user ID's. This file is leveraged by
 the development notebook.
 
+### ArticleRecommender
+
+This folder contains all the files necessary to create and upload the package to PyPi.
+
+**setup.py**, **dist**, **article_recommender.egg-info**: these files are not of interest
+to understand the package, they only contain metadata or elements necessary for the upload
+to PyPi.
+
+#### Article Recommender
+
+The folder article_recommender is where the main files are included.
+
+**license.txt**: a license in order to use this software, using a template provided by
+MIT
+
+**setup.cfg**: additional metadata information
+
+**recommender_helper_functions**: helper functions created from the development notebook
+
+**recommender**: the main module creating the ArticleRecommender class 
+
 ## Usage
+
+The ArticleRecommender class has 4 main methods.
+
+###1. load_data 
+
+To load both interaction and content information, either from two csv files
+or two existing Pandas dataframes
+
+        INPUT
+        interactions_path - (str) path to a CSV file containing information about interactions
+        between users and articles. It must include user_id (int), article_id (a float of the form
+        20.0) and title
+        
+        content_path - (str) path to a CSV file containing information about the content of the
+        articles. It must include article_id (as an int) and doc_description
+        between users and articles. It must include user_id, article_id and title
+        
+        csv -(bool) a Boolean specifying whether the document is a CSV file or an already
+        existing Pandas dataframe
+        
+        interactions - (pandas dataframe) contains information about interactions
+        between users and articles. It must contain user_id, article_id (a string of the form
+        '20.0') and title
+        
+        content -(pandas dataframe) contains information about the content of the
+        articles. It must include article_id (as an int) and doc_description
+        
+        OUTPUT
+        None, updates the following attributes
+        self.df - (pandas dataframe) (pandas dataframe) contains information about interactions
+        between users and articles
+        self.df_content - (pandas dataframe) contains information about the content of the
+        articles
+
+### 2. fit 
+
+This method performs matrix factorization using a basic form of FunkSVD with no regularization
+
+        INPUT:
+        latent_features - (int) the number of latent features used
+        learning_rate - (float) the learning rate
+        iters - (int) the number of iterations
+
+        OUTPUT:
+        None - stores the following as attributes:
+        n_users - the number of users (int)
+        n_articles - the number of articles (int)
+        num_interactions - the number of interactions calculated (int)
+        user_item_df - (pandas df) a user by item dataframe with interactions and nans for values
+        user_item - (np array) a user by item numpy array with interactions and nans for values
+        latent_features - (int) the number of latent features used
+        learning_rate - (float) the learning rate
+        iters - (int) the number of iterations
+        user_ids_series - (series) all the user_id's contained in our dataset
+        article_ids_series - (series) all the article id's contained in our dataset
+        user_mat - (np array) the user matrix resulting from FunkSVD
+        article_mat - (np array) the item matrix resulting from FunkSVD
+        
+### 3. predict_interactions 
+
+To predict the number of interactions between a user ID and an article ID
+
+        INPUT:
+        user_id - (int) the user_id from interactions df
+        article_id - (int) the article_id according the interactions df
+        doc_description
+        df_content - updated content dataframe with the new article to predict
+
+        OUTPUT:
+        pred - the predicted rating for user_id-movie_id according to FunkSVD
+
+        Description: we have four cases that we want to treat differently:
+            - if both the user_id and article_id are in the interactions df, we use the
+            results from FunkSVD
+            - if the user_id is in interactions df but the article ID is not (it is brand new),
+            if it is in the content dataframe then we use content-based filtering to predict ratings
+            based on ratings of similar movies
+            - if the user_id is not in the interactions df, we cannot make any predictions
+            - if the article_id is neither in the content or interaction dataset then we cannot predict anything
+            
+            
+### 4. make_recommendations 
+
+Given either a user or an article ID, make a number of recommendations
+
+        INPUT:
+        _id - either a user or movie id (int)
+        _id_type - "article" or "user" (str)
+        rec_num - number of recommendations to return (int)
+
+        OUTPUT:
+        recs - (array) a list or numpy array of recommended movies like the
+                       given movie, or recs for a user_id given
+
+        DESCRIPTION:
+        If the user is available in the interactions dataset, we use the matrix factorization data.
+        If the user is new we simply return the top rec_num articles
+        If we are trying to recommend based on an article, we will use a content-based recommendation system
+
+### Example Code
+
 ### Caveats
 
 ## Credit
-
-## License
