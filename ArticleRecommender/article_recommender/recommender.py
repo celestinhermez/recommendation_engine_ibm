@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-import recommender_helper_functions as rf
+from . import recommender_helper_functions as rf
 
-class Recommender():
+class ArticleRecommender():
     '''
     This Recommender uses a mix of FunkSVD and content-based methods to make recommendations
     for existing users, both for existing and brand new articles.
