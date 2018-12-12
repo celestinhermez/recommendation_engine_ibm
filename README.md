@@ -97,7 +97,7 @@ MIT
 
 The ArticleRecommender class has 4 main methods.
 
-###1. load_data 
+### 1. load_data 
 
 To load both interaction and content information, either from two csv files
 or two existing Pandas dataframes
@@ -195,6 +195,42 @@ Given either a user or an article ID, make a number of recommendations
 
 ### Example Code
 
-### Caveats
+Below is an example use of the class. The file structure used to load the data is that
+which results from cloning the directory locally. Setting the current working directory
+to "/recommendation_engine_ibm', and after installing the package:
+
+```buildoutcfg
+from article_recommender import ArticleRecommender
+
+# Instantiate our recommender
+rec = ArticleRecommender()
+
+# Load the data, assuming it is in csv files
+# To use already existing Pandas dataframe (after pre-processing e.g.), 
+# see the method docstring
+rec.load_data('development_notebook/data/user-item-interactions.csv', 
+'development_notebook/data/articles_community.csv')
+
+# Use the fit method to create user and article matrices, and find our top articles
+rec.fit()
+
+# Predict the number of interactions between an existing user and article
+rec.predict_interactions(1, 1160)
+
+# Predict the number of interactions between an existing user and a new article 
+# This article needs to be in the content dataset, i.e. have a description we can use
+# to make content recommendations. Here, this assumes an article with ID 123456 has
+# been added to the content dataset
+rec.predict_interactions(1, 123456)
+
+# Make recommendations for a given user ID
+rec.make_recommendations(_id=1)
+
+# Make recommendations for a given article ID
+rec.make_recommendations(_id=1160, _id_type='article')
+```
+
+For more information on how each method works and all the options available, please refer
+to the docstrings included above as well as in the appropriate files.
 
 ## Credit
