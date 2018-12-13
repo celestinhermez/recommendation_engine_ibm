@@ -106,6 +106,7 @@ class ArticleRecommender():
         article_ids_series - (series) all the article id's contained in our dataset
         user_mat - (np array) the user matrix resulting from FunkSVD
         article_mat - (np array) the item matrix resulting from FunkSVD
+        ranked_articles - (pandas dataframe) a dataframe with articles ranked by their number of interactions
         '''
 
         # Create user-item matrix

@@ -1,11 +1,11 @@
 # Recommendation Engine for Articles
 This project was originally part of Udacity's Data Scientist 
-nanodegree. The development notebook included in this repository ([here](https://github.com/celestinhermez/recommendation_engine_ibm)
-if this documentation is read on the PyPi website)
-contained the basic steps to create the methods that inform
-the Recommender class I created. Although this project was originally
-meant for IBM Watson's platform, I have generalized the approach
-to any corpus of articles that ought to be served to users.
+nanodegree. The development notebook included in this repository
+contained the basic instructions to create the methods that inform
+the ArticleRecommender class I created. Although this project was originally
+designed to create a recommendation engine for articles on the
+IBM Watson's platform, my solution works for any recommendation problem pertaining to
+articles.
 
 The goal of this module is to simplify the creation of a simple
 recommender system. Anyone with two csv files containing
@@ -13,12 +13,12 @@ information about the interactions between users and existing articles
 as well as a description about these articles is able to create
 a recommendation engine with a few lines of code thanks to this project.
 
-
 ## Installation
 
 In order to install this package, simply type
 `pip install article_recommender` in the terminal. Then, the main class can be imported
-by `from article_recommender import ArticleRecommender`.
+by `from article_recommender import ArticleRecommender`. Below is some example code
+including installation and import of the module.
 In order to run everything properly (including the development notebook), the
 following libraries need to be installed locally:
 * numpy
@@ -28,6 +28,7 @@ following libraries need to be installed locally:
 * re
 * matplotlib
 * pickle
+* scipy
 
 ## Structure
 
@@ -36,14 +37,14 @@ Two main folders are included in this repository.
 ### Development Notebook
 
 This folder contains all the files pertaining to the development 
-notebook that forms the basis of this package. This notebook was
+notebook, which was
 created as part of Udacity's Data Scientist nanodegree, and all
 the tests associated were created by them.
 
 **project_tests.py**: tests developed by Udacity to test the functions created in the
-development notebook.
+development notebook
 
-**top_5.p**, **top_10.p**, **top_20.p**, **user_item_matrix.p**: additional documents
+**top_5.p**, **top_10.p**, **top_20.p**, **user_item_matrix.p**: additional files
 called in *project_tests.py* to test our results
 
 **Recommendations_with_IBM.ipynb**: a Jupyter development notebook which contains all the
@@ -100,7 +101,8 @@ The ArticleRecommender class has 4 main methods.
 ### 1. load_data 
 
 To load both interaction and content information, either from two csv files
-or two existing Pandas dataframes
+or two existing Pandas dataframes. It also handles type conversion to make sure
+all the following methods can be used.
 
         INPUT
         interactions_path - (str) path to a CSV file containing information about interactions
@@ -151,6 +153,7 @@ This method performs matrix factorization using a basic form of FunkSVD with no 
         article_ids_series - (series) all the article id's contained in our dataset
         user_mat - (np array) the user matrix resulting from FunkSVD
         article_mat - (np array) the item matrix resulting from FunkSVD
+        ranked_articles - (pandas dataframe) a dataframe with articles ranked by their number of interactions
         
 ### 3. predict_interactions 
 
@@ -215,19 +218,19 @@ rec.load_data('development_notebook/data/user-item-interactions.csv',
 rec.fit()
 
 # Predict the number of interactions between an existing user and article
-rec.predict_interactions(1, 1160)
+interactions_1_1160 = rec.predict_interactions(1, 1160)
 
 # Predict the number of interactions between an existing user and a new article 
 # This article needs to be in the content dataset, i.e. have a description we can use
 # to make content recommendations. Here, this assumes an article with ID 123456 has
 # been added to the content dataset
-rec.predict_interactions(1, 123456)
+interactions_1_123456 = rec.predict_interactions(1, 123456)
 
 # Make recommendations for a given user ID
-rec.make_recommendations(_id=1)
+recs_user_1 = rec.make_recommendations(_id=1)
 
 # Make recommendations for a given article ID
-rec.make_recommendations(_id=1160, _id_type='article')
+recs_article_2 = rec.make_recommendations(_id=2, _id_type='article')
 ```
 
 For more information on how each method works and all the options available, please refer
