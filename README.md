@@ -234,3 +234,7 @@ For more information on how each method works and all the options available, ple
 to the docstrings included above as well as in the appropriate files.
 
 ## Credit
+
+The development notebook contained prompts and tests written by Udacity and were not my 
+own. All the remainder of this repository is my own work and should only be used under
+the appropriate license.
